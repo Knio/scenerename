@@ -11,6 +11,10 @@ samples = [
  'Firefly.S01E14.1080p.BluRay.DTS.x264-Z@X.mkv',
  'The.Office.US.S05E11.720p.HDTV.X264-DIMENSION.mkv',
  'Star Trek Enterprise - S04E14 The Aenar 720p DD5.1 x264 HDA.mkv',
+ 'Stargate 7x22 - The Lost City part 2.avi',
+ 'Stargate.SG-1.S05E17.DVDRip.DivX-SFM.avi',
+ 'Stargate.SG1.S01E06.AC3.DivX.DVDRip-AMC.avi',
+ 'stargate_sg-1.6x01.redemption_part1.ws_dvdrip_xvid-fov.avi',
 ]
 
 
@@ -58,9 +62,9 @@ def filter(n):
             m['show'] = nice(m['show'])
             if 'is_multiple' in m and m['is_multiple']:
                 m['is_multiple'] = bool(m['is_multiple'])
-                m['episode'] = m['episode'].replace('_', '-')
+                m['episode'] = m['episode'].replace('_', '-').rjust(2,'0')
             else:
-                m['episode'] = int(m['episode'])
+                m['episode'] = m['episode'].rjust(2,'0')
             if 'total_eps' in m and m['total_eps']:
                 m['total_eps'] = int(m['total_eps'])
             if m['season']:
@@ -122,6 +126,7 @@ def main():
                     new = format % dict
                 except KeyError, e:
                     dict[e.args[0]] = None
+                    
         else:
             confirm = False
             new = "ERROR: Non-matching name"
