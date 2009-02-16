@@ -10,6 +10,7 @@ samples = [
  'Lost.S01E24_25.HDTV.720p.avi',
  'Firefly.S01E14.1080p.BluRay.DTS.x264-Z@X.mkv',
  'The.Office.US.S05E11.720p.HDTV.X264-DIMENSION.mkv',
+ 'Star Trek Enterprise - S04E14 The Aenar 720p DD5.1 x264 HDA.mkv',
 ]
 
 
@@ -26,25 +27,25 @@ def filter(n):
     formats = [
     r"^(?P<group>[\w.@-]+)-(?P<show>[\w.-]+)(?P<season>\d)(?P<episode>\d{2})\.(?P<ext>\w+)$",
     r"""^
-        (?P<show>[\w.-]+?)
+        (?P<show>[ \w.-]+?)
         (?P<locale>US|UK)?  #Used for shows like The Office
         
-        (\.s?(?P<season>\d{1,2}))?   
+        -?([ \.]s?(?P<season>\d{1,2}))?   
         (e|x)?(?P<episode>\d{1,2}([-_](?P<is_multiple>\d{2}))?)(of(?P<total_eps>\d))?
         
-        (?P<title>[\w.-]+?)?? #Non-aggressive!
+        (?P<title>[ \w.-]+?)?? #Non-aggressive!
         
         (
-            ([\._](?P<ar>ws|fs|oar))|
-            ([\._](?P<is_repack>repack))|
-            ([\._](?P<is_proper>proper))|
-            ([\._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvdrip|dsr))|
-            ([\._](?P<resolution>720p|1080i|1080p))|
-            ([\._](?P<vcodec>xvid|x264|wmv-?hd))|
-            ([\._](?P<acodec>DD5\.?1|AC3|DTS))
+            ([ \._](?P<ar>ws|fs|oar))|
+            ([ \._](?P<is_repack>repack))|
+            ([ \._](?P<is_proper>proper))|
+            ([ \._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvdrip|dsr))|
+            ([ \._](?P<resolution>720p|1080i|1080p))|
+            ([ \._](?P<vcodec>xvid|x264|wmv-?hd))|
+            ([ \._](?P<acodec>DD5\.1|AC3|DTS))
         )*
         
-        (-(?P<group>[\w.@-]+))?
+        ([-\s](?P<group>[\w.@-]+))?
         
         \.(?P<ext>\w+)
     $""",
