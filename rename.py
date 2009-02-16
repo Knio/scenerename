@@ -32,12 +32,20 @@ def filter(n):
     r"^(?P<group>[\w.@-]+)-(?P<show>[\w.-]+)(?P<season>\d)(?P<episode>\d{2})\.(?P<ext>\w+)$",
     r"""^
         (?P<show>[ \w.-]+?)
-        (?P<locale>US|UK)?  #Used for shows like The Office
+        (?P<locale>US|UK)?                          #Used for shows like The Office
         
-        -?([ \.]s?(?P<season>\d{1,2}))?   
-        (e|x)?(?P<episode>\d{1,2}([-_](?P<is_multiple>\d{2}))?)(of(?P<total_eps>\d))?
+        -?([ \.](?P<SXXEXX>s)?                      #If 'S' require SXXEXX format
+        (?P<season>(?(SXXEXX)\d{2}|\d)))?           #If SXXEXX format require two digits
+        (?(SXXEXX)e|(?P<XxXX>x)?)                   #If SXXEXX look for 'E', otherwise look for XxXX format
+        (?P<episode>
+            (?(SXXEXX)
+                \d{2}([-_](?P<is_multiple>\d{2}))?  #If SXXEXX format, require two digits
+                |(?(XxXX)\d{2}|\d+)                 #If XxXX format, require two digits
+            )
+        )
+        (?(SXXEXX)|(?(XxXX)|of(?P<total_eps>\d+)))  #If not SXXEXX or XxXX format, look for parts
         
-        (?P<title>[ \w.-]+?)?? #Non-aggressive!
+        (?P<title>[ \w.-]+?)??                      #Non-aggressive!
         
         (
             ([ \._](?P<ar>ws|fs|oar))|
@@ -45,11 +53,11 @@ def filter(n):
             ([ \._](?P<is_proper>proper))|
             ([ \._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvdrip|dsr))|
             ([ \._](?P<resolution>720p|1080i|1080p))|
-            ([ \._](?P<vcodec>xvid|x264|wmv-?hd))|
+            ([ \._](?P<vcodec>xvid|divx|x264|h264))|
             ([ \._](?P<acodec>DD5\.1|AC3|DTS))
         )*
         
-        ([-\s](?P<group>[\w.@-]+))?
+        ([ -](?P<group>[\w.@]+))??
         
         \.(?P<ext>\w+)
     $""",
@@ -64,11 +72,11 @@ def filter(n):
                 m['is_multiple'] = bool(m['is_multiple'])
                 m['episode'] = m['episode'].replace('_', '-').rjust(2,'0')
             else:
+                
                 m['episode'] = m['episode'].rjust(2,'0')
             if 'total_eps' in m and m['total_eps']:
                 m['total_eps'] = int(m['total_eps'])
-            if m['season']:
-                m['season'] = int(m['season'])
+            m['season'] = int(m['season'] or 0)
             if 'title' in m and m['title']:
                 m['title'] = nice(m['title'])
             if 'is_repack' in m:
