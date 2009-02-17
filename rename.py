@@ -15,6 +15,7 @@ samples = [
  'Stargate.SG-1.S05E17.DVDRip.DivX-SFM.avi',
  'Stargate.SG1.S01E06.AC3.DivX.DVDRip-AMC.avi',
  'stargate_sg-1.6x01.redemption_part1.ws_dvdrip_xvid-fov.avi',
+ 'THE X-FILES - S01 E01 - PILOT NTSC DVD DD2.0 x264 MMI.mkv',
 ]
 
 
@@ -23,18 +24,19 @@ import os
 import re
 
 
-r_show    = r"(?P<show>[ \w.-]+?)(?P<locale>US|UK)?"
+r_show    = r"(?P<show>[ \w.-]+?)(?P<locale>US|UK)?[ -.]*"
 r_title   = r"([ -.]*(?P<title>[ \w.-]+?)[ -.]*)??"
 r_details = r"""
     (
         ([ ._](?P<ar>ws|fs|oar))|
         ([ ._](?P<is_repack>repack))|
         ([ ._](?P<is_proper>proper))|
-        ([ ._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvdrip|dsr|bd-rip))|
+        ([ ._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvd(rip)?|dsr|bd-rip))|
         ([ ._](?P<resolution>720p|1080i|1080p))|
         ([ ._](?P<vcodec>xvid|divx|x264|h264|vc1|mpeg2))|
-        ([ ._](?P<acodec>DD5[ .]1|AC3|DTS))|
-        ([ ._](?P<container>WMV-HD))
+        ([ ._](?P<acodec>DD|AC3|DTS))((?<=DD)(?P<achannels>2[ .]0|5[ .]1))?|
+        ([ ._](?P<container>WMV-HD))|
+        ([ ._](?P<broadcast>PAL|NTSC))
     )*"""
 r_group   = r"([ -](?P<group>[\w.@]+))??"
 r_fgroup  = r"((?P<group>[\w.@]+)-)?"
@@ -58,7 +60,7 @@ def filter(n):
         # show.S##E##    .title.details-group.ext
         #      S##E##-##
         #      S##E##-E##
-        r"^%sS(?P<season>\d{2})E(?P<episode>\d{2}([-_]\d{2})?)%s$" % (r_show, r_ending),
+        r"^%sS(?P<season>\d{2}).?E(?P<episode>\d{2}([-_]\d{2})?)%s$" % (r_show, r_ending),
         # show.#x## .title.details-group.ext
         #      ##x##
         r"^%s(?P<season>\d{1,2})x(?P<episode>\d{2})%s$" % (r_show, r_ending),
