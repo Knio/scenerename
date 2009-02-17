@@ -15,6 +15,7 @@ samples = [
  'Stargate.SG-1.S05E17.DVDRip.DivX-SFM.avi',
  'Stargate.SG1.S01E06.AC3.DivX.DVDRip-AMC.avi',
  'stargate_sg-1.6x01.redemption_part1.ws_dvdrip_xvid-fov.avi',
+ 'Masters Of Science Fiction S01E01 NTSC DVD X264 AC3 5.1.mkv',
  'THE X-FILES - S01 E01 - PILOT NTSC DVD DD2.0 x264 MMI.mkv',
 ]
 
@@ -34,7 +35,8 @@ r_details = r"""
         ([ ._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvd(rip)?|dsr|bd-rip))|
         ([ ._](?P<resolution>720p|1080i|1080p))|
         ([ ._](?P<vcodec>xvid|divx|x264|h264|vc1|mpeg2))|
-        ([ ._](?P<acodec>DD|AC3|DTS))((?<=DD)(?P<achannels>2[ .]0|5[ .]1))?|
+        ([ ._](?P<acodec>DD|AC3|DTS))|
+        ([ ._]?(?P<achannels>(1|2|5|6|7)[ .]?(0|1)))|
         ([ ._](?P<container>WMV-HD))|
         ([ ._](?P<broadcast>PAL|NTSC))
     )*"""
