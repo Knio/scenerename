@@ -17,7 +17,8 @@ samples = [
  'stargate_sg-1.6x01.redemption_part1.ws_dvdrip_xvid-fov.avi',
  'terminator.the.sarah.connor.chronicles.s01e09.dvdrip.xvid.orpheus.avi',
  'Masters Of Science Fiction S01E01 NTSC DVD X264 AC3 5.1.mkv',
- 'THE X-FILES - S01 E01 - PILOT NTSC DVD DD2.0 x264 MMI.mkv',
+ 'THE X-FILES - S07 E02 - THE SIXTH EXTINCTION (2) NTSC DVD DD2.0 x264 MMI.mkv',
+ 'Lost S01E01-E02 Title HDTV-Group.avi',
 ]
 
 
@@ -26,8 +27,8 @@ import os
 import re
 
 
-r_show    = r"(?P<show>[ \w.-]+?)(?P<locale>US|UK)?[ -.]*"
-r_title   = r"([ -.]*(?P<title>[ \w.-]+?)[ -.]*)??"
+r_show    = r"(?P<show>[- \w.]+?)(?P<locale>US|UK)?[-. ]*"
+r_title   = r"([-. ]*(?P<title>[- \w().]+?)[-. ]*)??"
 r_details = r"""
     (
         ([ ._](?P<ar>ws|fs|oar))|
@@ -41,7 +42,7 @@ r_details = r"""
         ([ ._](?P<container>WMV-HD))|
         ([ ._](?P<broadcast>PAL|NTSC))
     )*"""
-r_group   = r"([ -.](?P<group>[\w.@]+))??"
+r_group   = r"([-. ](?P<group>[-\w.@]+))??"
 r_fgroup  = r"((?P<group>[\w.@]+)-)?"
 r_ext     = r"\.(?P<ext>\w+)"
 r_ending  = r_title + r_details + r_group + r_ext
@@ -63,7 +64,7 @@ def filter(n):
         # show.S##E##    .title.details-group.ext
         #      S##E##-##
         #      S##E##-E##
-        r"^%sS(?P<season>\d{2}).?E(?P<episode>\d{2}([-_]\d{2})?)%s$" % (r_show, r_ending),
+        r"^%sS(?P<season>\d{2}).?E(?P<episode>\d{2}([-_](?:E)?\d{2})?)%s$" % (r_show, r_ending),
         # show.#x## .title.details-group.ext
         #      ##x##
         r"^%s(?P<season>\d{1,2})x(?P<episode>\d{2})%s$" % (r_show, r_ending),
@@ -77,7 +78,7 @@ def filter(n):
         if m:
             m = m.groupdict()
             m['show'] = nice(m['show'])
-            m['episode'] = m['episode'].replace('_', '-').rjust(2,'0')
+            m['episode'] = m['episode'].replace('_', '-').replace('E', '').rjust(2,'0')
             if 'total_eps' in m and m['total_eps']:
                 m['total_eps'] = int(m['total_eps'])
             if 'season' in m:
@@ -136,7 +137,8 @@ def main():
         names = os.listdir('.')
     
     def user_filter(f):
-        print f
+        if len(f) > 0:
+            print f
         def filter(n):
             for a,b in f:
                 n = re.sub('(?i)' + a, b, n)
@@ -163,7 +165,7 @@ def main():
                     new = format % dict
                 except KeyError, e:
                     dict[e.args[0]] = None
-                    
+            new = user_filter(filters2)(new)
         else:
             confirm = False
             new = "ERROR: Non-matching name"
