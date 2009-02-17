@@ -41,7 +41,7 @@ r_details = r"""
         ([ ._](?P<container>WMV-HD))|
         ([ ._](?P<broadcast>PAL|NTSC))
     )*"""
-r_group   = r"([ -](?P<group>[\w.@]+))??"
+r_group   = r"([ -.](?P<group>[\w.@]+))??"
 r_fgroup  = r"((?P<group>[\w.@]+)-)?"
 r_ext     = r"\.(?P<ext>\w+)"
 r_ending  = r_title + r_details + r_group + r_ext
@@ -103,6 +103,9 @@ def main():
     names = []
     format = "%(show)s %(season)sx%(episode)2s - %(title)s.%(ext)s"
     
+    filters1 = []
+    filters2 = []
+    
     while args:
         a = args.pop(0)
         if a == '--confirm' and allow_rename:
@@ -118,12 +121,31 @@ def main():
         elif a == '-o' or a == '--output':
             format = args.pop(0)
             
+        elif a == '--filter-before' or a == '-f1':
+            filters1.append(args.pop(0).split('=',2))
+            
+        elif a == '--filter-after' or a == '-f2':
+            filters2.append(args.pop(0).split('=',2))
+            
         else:
             allow_rename = confirm = False
             names.append(a)
     
+    
     if not names:
         names = os.listdir('.')
+    
+    def user_filter(f):
+        print f
+        def filter(n):
+            for a,b in f:
+                n = re.sub('(?i)' + a, b, n)
+            return n
+                
+        return filter
+    
+    names = map(user_filter(filters1), names)
+    
     
     newdicts = map(filter,names)
     
