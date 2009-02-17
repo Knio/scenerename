@@ -27,8 +27,8 @@ import os
 import re
 
 
-r_show    = r"(?P<show>[- \w.]+?)(?P<locale>US|UK)?[-. ]*"
-r_title   = r"([-. ]*(?P<title>[- \w().]+?)[-. ]*)??"
+r_show    = r"(?P<show>[-\w. ]+?)(?P<locale>US|UK)?[-. ]*"
+r_title   = r"([-. ]*(?P<title>[-\w(). ]+?)[-. ]*)??"
 r_details = r"""
     (
         ([ ._](?P<ar>ws|fs|oar))|
@@ -42,8 +42,8 @@ r_details = r"""
         ([ ._](?P<container>WMV-HD))|
         ([ ._](?P<broadcast>PAL|NTSC))
     )*"""
-r_group   = r"([-. ](?P<group>[-\w.@]+))??"
-r_fgroup  = r"((?P<group>[\w.@]+)-)?"
+r_group   = r"([-. ](?P<group>[\w.@]+?))??"
+r_fgroup  = r"((?P<group>[\w.@]+?)-)?"
 r_ext     = r"\.(?P<ext>\w+)"
 r_ending  = r_title + r_details + r_group + r_ext
 
@@ -64,7 +64,7 @@ def filter(n):
         # show.S##E##    .title.details-group.ext
         #      S##E##-##
         #      S##E##-E##
-        r"^%sS(?P<season>\d{2}).?E(?P<episode>\d{2}([-_](?:E)?\d{2})?)%s$" % (r_show, r_ending),
+        r"^%sS(?P<season>\d{2}).?E(?P<episode>\d{2}([-_]E?\d{2})?)%s$" % (r_show, r_ending),
         # show.#x## .title.details-group.ext
         #      ##x##
         r"^%s(?P<season>\d{1,2})x(?P<episode>\d{2})%s$" % (r_show, r_ending),
@@ -101,6 +101,7 @@ def main():
     confirm = False
     show_dict = False
     allow_rename = True
+    none_title = None
     names = []
     format = "%(show)s %(season)sx%(episode)2s - %(title)s.%(ext)s"
     
@@ -121,6 +122,9 @@ def main():
             
         elif a == '-o' or a == '--output':
             format = args.pop(0)
+            
+        elif a == '-n' or a == '--none':
+            none_title = args.pop(0)
             
         elif a == '--filter-before' or a == '-f1':
             filters1.append(args.pop(0).split('=',2))
@@ -147,19 +151,19 @@ def main():
         return filter
     
     names = map(user_filter(filters1), names)
-    
-    
     newdicts = map(filter,names)
     
     if not show_dict:
         print '-'*140
-        print "%-60s %-100s" %  ('Original Name', 'New Name')
+        print "%-70s %-70s" %  ('Original Name', 'New Name')
         print '-'*140
     
     for old, dict in zip(names,newdicts):
         
         if dict:
             new = None
+            if not 'title' in dict or not dict['title']:
+                dict['title'] = str(none_title)
             while not new:
                 try:
                     new = format % dict
@@ -178,7 +182,11 @@ def main():
                         print '  %s: %s' % (key, value)
             print
         else:
-            print "%-60s %-100s" % (old, new)
+            if len(old) > 70:
+                print old
+                print ' '*70, '%-70s' % new
+            else:
+                print "%-70s %-70s" % (old, new)
         
         if allow_rename and confirm and new:
             os.rename(old, new)
