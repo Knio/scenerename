@@ -15,6 +15,7 @@ samples = [
  'Stargate.SG-1.S05E17.DVDRip.DivX-SFM.avi',
  'Stargate.SG1.S01E06.AC3.DivX.DVDRip-AMC.avi',
  'stargate_sg-1.6x01.redemption_part1.ws_dvdrip_xvid-fov.avi',
+ 'terminator.the.sarah.connor.chronicles.s01e09.dvdrip.xvid.orpheus.avi',
  'Masters Of Science Fiction S01E01 NTSC DVD X264 AC3 5.1.mkv',
  'THE X-FILES - S01 E01 - PILOT NTSC DVD DD2.0 x264 MMI.mkv',
 ]
