@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 samples = [
  'Dead.Like.Me.S02E15.Haunted.WS.DVDRip.XviD-TVEP.avi',
  'dead_like_me.1x01.pilot.something.ws_dvdrip_xvid-fov.avi',
@@ -23,8 +25,14 @@ samples = [
 
 
 import sys
+sys.path.append('vendor/tvdb_api')
+
 import os
 import re
+
+import tvdb_api
+tvdb = tvdb_api.Tvdb()
+tvdb_cache = {}
 
 
 r_show    = r"(?P<show>[-\w. ]+?)(?P<locale>US|UK)?[-. ]*"
@@ -36,7 +44,7 @@ r_details = r"""
         ([ ._](?P<is_proper>proper))|
         ([ ._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvd(rip)?|dsr|bd-rip))|
         ([ ._](?P<resolution>720p|1080i|1080p))|
-        ([ ._](?P<vcodec>xvid|divx|x264|h264|vc1|mpeg2))|
+        ([ ._\-](?P<vcodec>xvid|divx|x264|h264|vc1|mpeg2))|
         ([ ._](?P<acodec>DD|AC3|DTS))|
         ([ ._]?(?P<achannels>(1|2|5|6|7)[ .]?(0|1)))|
         ([ ._](?P<container>WMV-HD))|
@@ -54,6 +62,8 @@ def filter(n):
         return re.sub("[._]", " ", s).title().strip()
     
     formats = [
+        # group-show.S##E##.details.ext
+        r"^%s%sS(?P<season>\d{2})E(?P<episode>\d{2})%s%s$" % (r_fgroup, r_show, r_details, r_ext),
         # group-show### .ext
         #           ####
         r"^%s%s(?P<season>\d{1,2})(?P<episode>\d{2})%s$" % (r_fgroup, r_show, r_ext),
@@ -79,14 +89,26 @@ def filter(n):
             m = m.groupdict()
             m['show'] = nice(m['show'])
             m['episode'] = m['episode'].replace('_', '-').replace('E', '').rjust(2,'0')
+            
             if 'total_eps' in m and m['total_eps']:
                 m['total_eps'] = int(m['total_eps'])
+            
             if 'season' in m:
                 m['season'] = int(m['season'])
             else:
                 m['season'] = 0
+            
             if 'title' in m and m['title']:
                 m['title'] = nice(m['title'])
+            else:
+                try:
+                    if m['show'].lower() not in tvdb_cache:
+                        tvdb_cache[m['show'].lower()] = tvdb[m['show']]
+                    m['title'] = tvdb_cache[m['show'].lower()][int(m['season'])][int(m['episode'])]['episodename']
+                    #m['show'] = tvdb_cache[m['show'].lower()]['showname']
+                except (tvdb_api.tvdb_shownotfound, tvdb_api.tvdb_seasonnotfound, tvdb_api.tvdb_episodenotfound):
+                    m['title'] = None
+            
             if 'is_repack' in m:
                 m['is_repack'] = bool(m['is_repack'])
             if 'is_proper' in m:
