@@ -24,13 +24,18 @@ samples = [
 ]
 
 
-import sys
-sys.path.append('vendor/tvdb_api')
-
 import os
 import re
+import sys
 
-import tvdb_api
+try:
+    from vendor import *
+except ImportError:
+    #Attempt to add empty __init__.py to tvdb_api
+    init = open(os.path.join(os.path.dirname(sys.argv[0]), 'vendor/tvdb_api/__init__.py'), 'w')
+    init.close()
+    from vendor import *
+
 tvdb = tvdb_api.Tvdb()
 tvdb_cache = {}
 
@@ -98,25 +103,26 @@ def filter(n):
             else:
                 m['season'] = 0
             
-            if 'title' in m and m['title']:
-                m['title'] = nice(m['title'])
-            else:
-                try:
-                    lookup = m['show']
-                    if 'locale' in m and m['locale']:
-                        lookup += ' ' + m['locale']
-                    lookup = lookup.lower()
-                    
-                    if lookup not in tvdb_cache:
-                        tvdb_cache[lookup] = tvdb[lookup]
-                    
-                    episode = m['episode']
-                    if '-' in episode:
-                        episode = episode.split('-')[0]
-                    
-                    m['title'] = tvdb_cache[lookup][int(m['season'])][int(episode)]['episodename']
-                    #m['show'] = tvdb_cache[lookup]['showname']
-                except (tvdb_api.tvdb_shownotfound, tvdb_api.tvdb_seasonnotfound, tvdb_api.tvdb_episodenotfound):
+            try:
+                lookup = m['show']
+                if 'locale' in m and m['locale']:
+                    lookup += ' ' + m['locale']
+                lookup = lookup.lower()
+                
+                if lookup not in tvdb_cache:
+                    print 'Fetching series data for "%s"...' % lookup
+                    tvdb_cache[lookup] = tvdb[lookup]
+                
+                episode = m['episode']
+                if '-' in episode:
+                    episode = episode.split('-')[0]
+                
+                m['title'] = tvdb_cache[lookup][int(m['season'])][int(episode)]['episodename']
+                m['show'] = tvdb_cache[lookup]['seriesname']
+            except (tvdb_api.tvdb_error, tvdb_api.tvdb_shownotfound, tvdb_api.tvdb_seasonnotfound, tvdb_api.tvdb_episodenotfound):
+                if 'title' in m and m['title']:
+                    m['title'] = nice(m['title'])
+                else:
                     m['title'] = None
             
             if 'is_repack' in m:

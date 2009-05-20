@@ -23,7 +23,7 @@ Command line arguments:
     
     Specifies an alternate output format. Use the python string format
     notation coupled with the names from `-d`.
-    (i.e. `-o %(show)s %(season)sx%(episode)2s - %(title)s.%(ext)s`)
+    (i.e. `-o "%(show)s %(season)sx%(episode)2s - %(title)s.%(ext)s"`)
 
 *   `-n` / `--none`
     
