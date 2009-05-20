@@ -32,8 +32,7 @@ try:
     from vendor import *
 except ImportError:
     #Attempt to add empty __init__.py to tvdb_api
-    init = open(os.path.join(os.path.dirname(sys.argv[0]), 'vendor/tvdb_api/__init__.py'), 'w')
-    init.close()
+    open(os.path.join(os.path.dirname(sys.argv[0]), 'vendor/tvdb_api/__init__.py'), 'w').close()
     from vendor import *
 
 tvdb = tvdb_api.Tvdb()
@@ -233,7 +232,7 @@ def main():
     if confirm:
         print 'Files have been renamed'
     elif allow_rename:
-        print 'Run with "confirm" to rename files'
+        print 'Run with "--confirm" to rename files'
 
 
 if __name__ == '__main__':
