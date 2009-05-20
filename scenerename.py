@@ -102,10 +102,20 @@ def filter(n):
                 m['title'] = nice(m['title'])
             else:
                 try:
-                    if m['show'].lower() not in tvdb_cache:
-                        tvdb_cache[m['show'].lower()] = tvdb[m['show']]
-                    m['title'] = tvdb_cache[m['show'].lower()][int(m['season'])][int(m['episode'])]['episodename']
-                    #m['show'] = tvdb_cache[m['show'].lower()]['showname']
+                    lookup = m['show']
+                    if 'locale' in m and m['locale']:
+                        lookup += ' ' + m['locale']
+                    lookup = lookup.lower()
+                    
+                    if lookup not in tvdb_cache:
+                        tvdb_cache[lookup] = tvdb[lookup]
+                    
+                    episode = m['episode']
+                    if '-' in episode:
+                        episode = episode.split('-')[0]
+                    
+                    m['title'] = tvdb_cache[lookup][int(m['season'])][int(episode)]['episodename']
+                    #m['show'] = tvdb_cache[lookup]['showname']
                 except (tvdb_api.tvdb_shownotfound, tvdb_api.tvdb_seasonnotfound, tvdb_api.tvdb_episodenotfound):
                     m['title'] = None
             
