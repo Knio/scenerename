@@ -21,6 +21,7 @@ samples = [
  'Masters Of Science Fiction S01E01 NTSC DVD X264 AC3 5.1.mkv',
  'THE X-FILES - S07 E02 - THE SIXTH EXTINCTION (2) NTSC DVD DD2.0 x264 MMI.mkv',
  'Lost S01E01-E02 Title HDTV-Group.avi',
+ 'Lost 5x11 - Whatever Happened, Happened.avi',
 ]
 
 
@@ -40,7 +41,7 @@ tvdb_cache = {}
 
 
 r_show    = r"(?P<show>[-\w. ]+?)(?P<locale>US|UK)?[-. ]*"
-r_title   = r"([-. ]*(?P<title>[-\w(). ]+?)[-. ]*)??"
+r_title   = r"([-. ]*(?P<title>[-\w().,' ]+?)[-. ]*)??"
 r_details = r"""
     (
         ([ ._](?P<ar>ws|fs|oar))|

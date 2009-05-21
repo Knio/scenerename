@@ -12,7 +12,7 @@ Individual Files
 ----------------
 Pass individual file names as arguments to rename specific files.
 
-    /mnt/media/.Downloads/Scrubs.S08.720p.HDTV.x264$ python ~/projects/scenerename/scenerename.py e7-scrubs.s08e09.720p-x264.mkv Scrubs.S08E02.720p.HDTV.X264-DIMENSION.mkv
+    /mnt/media/.Downloads/Scrubs.S08.720p.HDTV.x264$ ~/scenerename.py e7-scrubs.s08e09.720p-x264.mkv Scrubs.S08E02.720p.HDTV.X264-DIMENSION.mkv
     Fetching series data for "scrubs"...
     --------------------------------------------------------------------------------------------------------------------------------------------
     Original Name                                                          New Name
@@ -27,7 +27,7 @@ Directories
 -----------
 Run the script in a directory to have it parse all of the files.
 
-    /mnt/media/.Downloads/Scrubs.S08.720p.HDTV.x264$ python ~/projects/scenerename/scenerename.py
+    /mnt/media/.Downloads/Scrubs.S08.720p.HDTV.x264$ ~/scenerename.py
     Fetching series data for "scrubs"...
     --------------------------------------------------------------------------------------------------------------------------------------------
     Original Name                                                          New Name
@@ -59,7 +59,7 @@ Dictionary Output
 The dictionary output (`-d`/`--dict`) shows you all of the data that `scenerename` was
 able to match.
 
-    /mnt/media/.Downloads/Scrubs.S08.720p.HDTV.x264$ python ~/projects/scenerename/scenerename.py --dict Scrubs.S08E02.720p.HDTV.X264-DIMENSION.mkv
+    /mnt/media/.Downloads/Scrubs.S08.720p.HDTV.x264$ ~/scenerename.py --dict Scrubs.S08E02.720p.HDTV.X264-DIMENSION.mkv
     Fetching series data for "scrubs"...
     Scrubs.S08E02.720p.HDTV.X264-DIMENSION.mkv --> Scrubs 8x02 - My Last Words.mkv
       episode: 02
