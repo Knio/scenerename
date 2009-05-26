@@ -1,3 +1,7 @@
+#!/usr/bin/python
+
+WIDTH = 100
+
 samples = [
  'Dead.Like.Me.S02E15.Haunted.WS.DVDRip.XviD-TVEP.avi',
  'dead_like_me.1x01.pilot.something.ws_dvdrip_xvid-fov.avi',
@@ -22,16 +26,21 @@ samples = [
  'mythbusters.pilots.ep01.dvdrip.xvid-memetic.avi',
  '[BHD]battlestar.galactica.s04e20.720p.hdtv.x264-ctu.mkv',
  'aaf-bsg.s04e11.avi',
+ 'Lost 5x11 - Whatever Happened, Happened.avi',
 ]
 
 
-import sys
 import os
 import re
+import sys
+
+from vendor import *
+tvdb = tvdb_api.Tvdb()
 
 
 r_show    = r"(?P<show>[-\w. ]+?)(?P<locale>US|UK)?[-. ]*"
-r_title   = r"([-. ]*(?P<title>[-\w(). ]+?)[-. ]*)??"
+r_title   = r"([-. ]*(?P<title>[-\w().,' ]+?)[-. ]*)??"
+
 r_details = r"""
     (
         ([ ._](?P<ar>ws|fs|oar))|
@@ -39,7 +48,7 @@ r_details = r"""
         ([ ._](?P<is_proper>proper))|
         ([ ._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvd(rip)?|dsr|bd-rip))|
         ([ ._](?P<resolution>720p|1080i|1080p))|
-        ([ ._](?P<vcodec>xvid|divx|x264|h264|vc1|mpeg2))|
+        ([ ._\-](?P<vcodec>xvid|divx|x264|h264|vc1|mpeg2))|
         ([ ._](?P<acodec>DD|AC3|DTS))|
         ([ ._]?(?P<achannels>(1|2|5|6|7)[ .]?(0|1)))|
         ([ ._](?P<container>WMV-HD))|
@@ -57,6 +66,8 @@ def filter(n):
         return re.sub("[._]", " ", s).title().strip()
     
     formats = [
+        # group-show.S##E##.details.ext
+        r"^%s%sS(?P<season>\d{2})E(?P<episode>\d{2})%s%s$" % (r_fgroup, r_show, r_details, r_ext),
         # group-show### .ext
         #           ####
         r"^%s%s(?P<season>\d{1,2})(?P<episode>\d{2})%s$" % (r_fgroup, r_show, r_ext),
@@ -82,14 +93,33 @@ def filter(n):
             m = m.groupdict()
             m['show'] = nice(m['show'])
             m['episode'] = m['episode'].replace('_', '-').replace('E', '').rjust(2,'0')
+            
             if 'total_eps' in m and m['total_eps']:
                 m['total_eps'] = int(m['total_eps'])
+            
             if 'season' in m:
                 m['season'] = int(m['season'])
             else:
                 m['season'] = 0
-            if 'title' in m and m['title']:
-                m['title'] = nice(m['title'])
+            
+            try:
+                lookup = m['show']
+                if 'locale' in m and m['locale']:
+                    lookup += ' ' + m['locale']
+                lookup = lookup.lower()
+                
+                episode = m['episode']
+                if '-' in episode:
+                    episode = episode.split('-')[0]
+                
+                m['title'] = tvdb[lookup][int(m['season'])][int(episode)]['episodename']
+                m['show'] = tvdb[lookup]['seriesname']
+            except (tvdb_api.tvdb_error, tvdb_api.tvdb_shownotfound, tvdb_api.tvdb_seasonnotfound, tvdb_api.tvdb_episodenotfound):
+                if 'title' in m and m['title']:
+                    m['title'] = nice(m['title'])
+                else:
+                    m['title'] = None
+            
             if 'is_repack' in m:
                 m['is_repack'] = bool(m['is_repack'])
             if 'is_proper' in m:
@@ -97,8 +127,6 @@ def filter(n):
             return m
     return None
 
-
-WIDTH = 100
 
 def main():
     args = sys.argv[1:]
@@ -182,7 +210,8 @@ def main():
             print '%s --> %s' % (old, new)
             if dict:
                 for key, value in dict.items():
-                    print '  %s: %s' % (key, value)
+                    if value:
+                        print '  %s: %s' % (key, value)
             print
         else:
             if len(old) > WIDTH/2:
@@ -203,3 +232,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
