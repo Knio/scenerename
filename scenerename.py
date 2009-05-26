@@ -72,7 +72,7 @@ def filter(n):
         # show.S##E##    .title.details-group.ext
         #      S##E##-##
         #      S##E##-E##
-        r"^%sS(?P<season>\d{2}).?E(?P<episode>\d{2}([-_]E?\d{2})?)%s$" % (r_show, r_ending),
+        r"^%sS(?P<season>\d{2}).?EP?(?P<episode>\d{2}([-_]E?\d{2})?)%s$" % (r_show, r_ending),
         # show.#x## .title.details-group.ext
         #      ##x##
         r"^%s(?P<season>\d{1,2})x(?P<episode>\d{2})%s$" % (r_show, r_ending),
