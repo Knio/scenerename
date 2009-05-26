@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+WIDTH = 100
+
 samples = [
  'Dead.Like.Me.S02E15.Haunted.WS.DVDRip.XviD-TVEP.avi',
  'dead_like_me.1x01.pilot.something.ws_dvdrip_xvid-fov.avi',
@@ -21,6 +23,9 @@ samples = [
  'Masters Of Science Fiction S01E01 NTSC DVD X264 AC3 5.1.mkv',
  'THE X-FILES - S07 E02 - THE SIXTH EXTINCTION (2) NTSC DVD DD2.0 x264 MMI.mkv',
  'Lost S01E01-E02 Title HDTV-Group.avi',
+ 'mythbusters.pilots.ep01.dvdrip.xvid-memetic.avi',
+ '[BHD]battlestar.galactica.s04e20.720p.hdtv.x264-ctu.mkv',
+ 'aaf-bsg.s04e11.avi',
  'Lost 5x11 - Whatever Happened, Happened.avi',
 ]
 
@@ -35,6 +40,7 @@ tvdb = tvdb_api.Tvdb()
 
 r_show    = r"(?P<show>[-\w. ]+?)(?P<locale>US|UK)?[-. ]*"
 r_title   = r"([-. ]*(?P<title>[-\w().,' ]+?)[-. ]*)??"
+
 r_details = r"""
     (
         ([ ._](?P<ar>ws|fs|oar))|
@@ -156,7 +162,7 @@ def main():
         elif a == '--filter-before' or a == '-f1':
             filters1.append(args.pop(0).split('=',2))
             
-        elif a == '--filter-after' or a == '-f2':
+        elif a == '--filter-after'  or a == '-f2':
             filters2.append(args.pop(0).split('=',2))
             
         else:
@@ -165,7 +171,7 @@ def main():
     
     
     if not names:
-        names = os.listdir('.')
+        names = [i for i in  os.listdir('.') if os.path.isfile(i)]
     
     def user_filter(f):
         if len(f) > 0:
@@ -177,16 +183,15 @@ def main():
                 
         return filter
     
-    names = map(user_filter(filters1), names)
-    newdicts = map(filter,names)
+    newdicts = [filter(user_filter(filters1)(i)) for i in names]
     
     if not show_dict:
-        print '-'*140
-        print "%-70s %-70s" %  ('Original Name', 'New Name')
-        print '-'*140
+        print '-'*WIDTH
+        print "%-*s %-*s" %  (WIDTH/2, 'Original Name',  WIDTH/2, 'New Name')
+        print '-'*WIDTH
     
     for old, dict in zip(names,newdicts):
-        
+        cnf = confirm
         if dict:
             new = None
             if not 'title' in dict or not dict['title']:
@@ -198,7 +203,7 @@ def main():
                     dict[e.args[0]] = None
             new = user_filter(filters2)(new)
         else:
-            confirm = False
+            cnf = False
             new = "ERROR: Non-matching name"
         
         if show_dict:
@@ -209,13 +214,13 @@ def main():
                         print '  %s: %s' % (key, value)
             print
         else:
-            if len(old) > 70:
+            if len(old) > WIDTH/2:
                 print old
-                print ' '*70, '%-70s' % new
+                print ' '*(WIDTH/2), '%-*s' % (WIDTH,new)
             else:
-                print "%-70s %-70s" % (old, new)
+                print "%-*s %-*s" % (WIDTH/2, old, WIDTH/2, new)
         
-        if allow_rename and confirm and new:
+        if allow_rename and cnf and new:
             os.rename(old, new)
     
     print
@@ -227,3 +232,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
