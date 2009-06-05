@@ -60,31 +60,31 @@ r_ext     = r"\.(?P<ext>\w+)"
 r_ending  = r_title + r_details + r_group + r_ext
 
 
-def filter(n):
+def filter_name(n):
     
     def nice(s):
         return re.sub("[._]", " ", s).title().strip()
     
     formats = [
         # group-show.S##E##.details.ext
-        r"^%s%sS(?P<season>\d{2})E(?P<episode>\d{2})%s%s$" % (r_fgroup, r_show, r_details, r_ext),
+        r"^%s%sS(?P<season>\d{2})E(?P<episode>\d{2}(-\d{2})?)%s%s$" % (r_fgroup, r_show, r_details, r_ext),
         # group-show### .ext
         #           ####
-        r"^%s%s(?P<season>\d{1,2})(?P<episode>\d{2})%s$" % (r_fgroup, r_show, r_ext),
+        r"^%s%s(?P<season>\d{1,2})(?P<episode>\d{2}(-\d{2})?)%s$" % (r_fgroup, r_show, r_ext),
         # show.# of# .title.details-group.ext
         #      # of##
         #      ##of##
-        r"^%s(?P<episode>\d{1,2})of(?P<total_eps>\d{1,2})%s$" % (r_show, r_ending),
+        r"^%s(?P<episode>\d{1,2}(-\d{2})?)of(?P<total_eps>\d{1,2})%s$" % (r_show, r_ending),
         # show.S##E##    .title.details-group.ext
         #      S##E##-##
         #      S##E##-E##
         r"^%sS(?P<season>\d{2}).?EP?(?P<episode>\d{2}([-_]E?\d{2})?)%s$" % (r_show, r_ending),
         # show.#x## .title.details-group.ext
         #      ##x##
-        r"^%s(?P<season>\d{1,2})x(?P<episode>\d{2})%s$" % (r_show, r_ending),
+        r"^%s(?P<season>\d{1,2})x(?P<episode>\d{2}(-\d{2})?)%s$" % (r_show, r_ending),
         # show.### .title.details-group.ext
         #      ####
-        r"^%s(?P<season>\d{1,2})(?P<episode>\d{2})%s$" % (r_show, r_ending),
+        r"^%s(?P<season>\d{1,2})(?P<episode>\d{2}(-\d{2})?)%s$" % (r_show, r_ending),
     ]
     
     for r in formats:
@@ -112,6 +112,8 @@ def filter(n):
                 if '-' in episode:
                     episode = episode.split('-')[0]
                 
+                
+                
                 m['title'] = tvdb[lookup][int(m['season'])][int(episode)]['episodename']
                 m['show'] = tvdb[lookup]['seriesname']
             except (tvdb_api.tvdb_error, tvdb_api.tvdb_shownotfound, tvdb_api.tvdb_seasonnotfound, tvdb_api.tvdb_episodenotfound):
@@ -127,6 +129,15 @@ def filter(n):
             return m
     return None
 
+def filename(s):
+    '''
+    converts a string to a valid filename
+    by stripping out incvalid characters
+    '''
+    invalid = r'''?\/:<>|'''
+    return ''.join(filter(lambda c:c not in invalid, list(s)))
+    
+    
 
 def main():
     args = sys.argv[1:]
@@ -214,7 +225,7 @@ Command Line Arguments
                 
         return filter
     
-    newdicts = [filter(user_filter(filters1)(i)) for i in names]
+    newdicts = [filter_name(user_filter(filters1)(i)) for i in names]
     
     if not show_dict:
         print '-'*WIDTH
@@ -232,7 +243,7 @@ Command Line Arguments
                     new = format % dict
                 except KeyError, e:
                     dict[e.args[0]] = None
-            new = user_filter(filters2)(new)
+            new = filename(user_filter(filters2)(new))
         else:
             cnf = False
             new = "ERROR: Non-matching name"
