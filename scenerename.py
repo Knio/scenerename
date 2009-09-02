@@ -143,6 +143,7 @@ def main():
     args = sys.argv[1:]
     
     confirm = False
+    confirm_each = False
     show_dict = False
     allow_rename = True
     none_title = None
@@ -187,6 +188,9 @@ Command Line Arguments
             
         elif a == '--confirm' and allow_rename:
             confirm = True
+
+        elif a == '--confirm-each' and allow_rename:
+            confirm_each = True           
             
         elif a == '-s' or a == '--samples':
             names = samples
@@ -233,7 +237,7 @@ Command Line Arguments
         print '-'*WIDTH
     
     for old, dict in zip(names,newdicts):
-        cnf = confirm
+        cnf = True
         if dict:
             new = None
             if not 'title' in dict or not dict['title']:
@@ -262,8 +266,16 @@ Command Line Arguments
             else:
                 print "%-*s %-*s" % (WIDTH/2, old, WIDTH/2, new)
         
-        if allow_rename and cnf and new:
+        if allow_rename and confirm and cnf and new:
             os.rename(old, new)
+
+        elif allow_rename and confirm_each and cnf and new:
+          print 'rename? (y/n)',
+          import msvcrt
+          c = msvcrt.getch()
+          if c in ['y','Y']:
+            os.rename(old, new)
+          print '\b'*20,
     
     print
     if confirm:
