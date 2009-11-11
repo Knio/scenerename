@@ -261,10 +261,10 @@ Command Line Arguments
             print
         else:
             if len(old) > WIDTH/2:
-                print old
-                print ' '*(WIDTH/2), '%-*s' % (WIDTH,new)
+                print old.encode('ascii','replace')
+                print ' '*(WIDTH/2), '%-*s' % (WIDTH,new.encode('ascii','replace'))
             else:
-                print "%-*s %-*s" % (WIDTH/2, old, WIDTH/2, new)
+                print "%-*s %-*s" % (WIDTH/2, old.encode('ascii','replace'), WIDTH/2, new.encode('ascii','replace'))
         
         if allow_rename and confirm and cnf and new:
             os.rename(old, new)
