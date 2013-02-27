@@ -46,8 +46,8 @@ r_details = r"""
         ([ ._](?P<ar>ws|fs|oar))|
         ([ ._](?P<is_repack>repack))|
         ([ ._](?P<is_proper>proper))|
-        ([ ._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvd(rip)?|dsr|bd-rip))|
-        ([ ._](?P<resolution>720p|1080i|1080p))|
+        ([ ._](?P<source>hdtv|blu-?ray|hd-?dvd|pdtv|dvd(rip)?|dsr|bd-rip|webrip))|
+        ([ ._](?P<resolution>576p|720p|1080i|1080p))|
         ([ ._\-](?P<vcodec>xvid|divx|x264|h264|vc1|mpeg2))|
         ([ ._](?P<acodec>DD|AC3|DTS))|
         ([ ._]?(?P<achannels>(1|2|5|6|7)[ .]?(0|1)))|
@@ -61,10 +61,10 @@ r_ending  = r_title + r_details + r_group + r_ext
 
 
 def filter_name(n):
-    
+
     def nice(s):
         return re.sub("[._]", " ", s).title().strip()
-    
+
     formats = [
         # group-show.S##E##.details.ext
         r"^%s%sS(?P<season>\d{2})E(?P<episode>\d{2}(-\d{2})?)%s%s$" % (r_fgroup, r_show, r_details, r_ext),
@@ -86,34 +86,34 @@ def filter_name(n):
         #      ####
         r"^%s(?P<season>\d{1,2})(?P<episode>\d{2}(-\d{2})?)%s$" % (r_show, r_ending),
     ]
-    
+
     for r in formats:
         m = re.match(r, n, re.IGNORECASE | re.VERBOSE)
         if m:
             m = m.groupdict()
             m['show'] = nice(m['show'])
             m['episode'] = m['episode'].replace('_', '-').replace('E', '').rjust(2,'0')
-            
+
             if 'total_eps' in m and m['total_eps']:
                 m['total_eps'] = int(m['total_eps'])
-            
+
             if 'season' in m:
                 m['season'] = int(m['season'])
             else:
                 m['season'] = 0
-            
+
             try:
                 lookup = m['show']
                 if 'locale' in m and m['locale']:
                     lookup += ' ' + m['locale']
                 lookup = lookup.lower()
-                
+
                 episode = m['episode']
                 if '-' in episode:
                     episode = episode.split('-')[0]
-                
-                
-                
+
+
+
                 m['title'] = tvdb[lookup][int(m['season'])][int(episode)]['episodename']
                 m['show'] = tvdb[lookup]['seriesname']
             except (tvdb_api.tvdb_error, tvdb_api.tvdb_shownotfound, tvdb_api.tvdb_seasonnotfound, tvdb_api.tvdb_episodenotfound):
@@ -121,7 +121,7 @@ def filter_name(n):
                     m['title'] = nice(m['title'])
                 else:
                     m['title'] = None
-            
+
             if 'is_repack' in m:
                 m['is_repack'] = bool(m['is_repack'])
             if 'is_proper' in m:
@@ -136,12 +136,12 @@ def filename(s):
     '''
     invalid = r'''?\/:<>|'''
     return ''.join(filter(lambda c:c not in invalid, list(s)))
-    
-    
+
+
 
 def main():
     args = sys.argv[1:]
-    
+
     confirm = False
     confirm_each = False
     show_dict = False
@@ -149,76 +149,77 @@ def main():
     none_title = None
     names = []
     format = "%(show)s %(season)sx%(episode)2s - %(title)s.%(ext)s"
-    
+
     filters1 = []
     filters2 = []
-    
+
     while args:
         a = args.pop(0)
         if a == '-h' or a == '--help' or a == '-help':
             print '''
 Command Line Arguments
 
--s / --samples          Test out the parsing on a variety of samples which 
+-s / --samples          Test out the parsing on a variety of samples which
                         were designed to challenge the script.
 
--d / --dict             Displays a verbose dictionary of all the matched 
+-d / --dict             Displays a verbose dictionary of all the matched
                         elements in the name.
 
--o / --output           Specifies an alternate output format. Use the python 
+-o / --output           Specifies an alternate output format. Use the python
                         string format notation coupled with the names from -d.
             (i.e. -o "%(show)s %(season)sx%(episode)2s - %(title)s.%(ext)s")
 
--n / --none             Alternate string to use for unknown titles. 
+-n / --none             Alternate string to use for unknown titles.
                         (Default: "None")
 
 -f1 / --filter-before   Apply pre-parsing rules to difficult names to aid in
                         proper parsing. (i.e. -f1 '[{group|name]}'='groupname')
 
--f2 / --filter-after    Apply post-parsing replacements to difficult names to 
-                        aid in proper parsing. Works exactly like -f1 except 
+-f2 / --filter-after    Apply post-parsing replacements to difficult names to
+                        aid in proper parsing. Works exactly like -f1 except
                         the replacement is done on the new filename.
 
---confirm               Be default the script only display how it would rename 
-                        the files but will not perform the action. 
+--confirm               Be default the script only display how it would rename
+                        the files but will not perform the action.
                         Append this to perform the renaming.
 '''
             return
-            
-            
+
+
         elif a == '--confirm' and allow_rename:
             confirm = True
 
         elif a == '--confirm-each' and allow_rename:
-            confirm_each = True           
-            
+            confirm_each = True
+
         elif a == '-s' or a == '--samples':
             names = samples
             allow_rename = False
-            
+
         elif a == '-d' or a == '--dict':
             show_dict = True
-            
+
         elif a == '-o' or a == '--output':
             format = args.pop(0)
-            
+
         elif a == '-n' or a == '--none':
             none_title = args.pop(0)
-            
+
         elif a == '--filter-before' or a == '-f1':
             filters1.append(args.pop(0).split('=',2))
-            
+
         elif a == '--filter-after'  or a == '-f2':
             filters2.append(args.pop(0).split('=',2))
-            
+
         else:
             allow_rename = confirm = False
             names.append(a)
-    
-    
+
+
     if not names:
         names = [i for i in  os.listdir('.') if os.path.isfile(i)]
-    
+        names.sort()
+
     def user_filter(f):
         if len(f) > 0:
             print f
@@ -226,16 +227,16 @@ Command Line Arguments
             for a,b in f:
                 n = re.sub('(?i)' + a, b, n)
             return n
-                
+
         return filter
-    
+
     newdicts = [filter_name(user_filter(filters1)(i)) for i in names]
-    
+
     if not show_dict:
         print '-'*WIDTH
         print "%-*s %-*s" %  (WIDTH/2, 'Original Name',  WIDTH/2, 'New Name')
         print '-'*WIDTH
-    
+
     for old, dict in zip(names,newdicts):
         cnf = True
         if dict:
@@ -251,7 +252,7 @@ Command Line Arguments
         else:
             cnf = False
             new = "ERROR: Non-matching name"
-        
+
         if show_dict:
             print '%s --> %s' % (old, new)
             if dict:
@@ -265,7 +266,7 @@ Command Line Arguments
                 print ' '*(WIDTH/2), '%-*s' % (WIDTH,new.encode('ascii','replace'))
             else:
                 print "%-*s %-*s" % (WIDTH/2, old.encode('ascii','replace'), WIDTH/2, new.encode('ascii','replace'))
-        
+
         if allow_rename and confirm and cnf and new:
             os.rename(old, new)
 
@@ -276,7 +277,7 @@ Command Line Arguments
           if c in ['y','Y']:
             os.rename(old, new)
           print '\b'*20,
-    
+
     print
     if confirm:
         print 'Files have been renamed'
