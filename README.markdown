@@ -113,7 +113,7 @@ Command Line Arguments
 
 Developed By
 ============
-* Tom Flanagan - <theknio@gmail.com>
+* Tom Flanagan - <knio@zkpq.ca>
 * Jake Wharton - <jakewharton@gmail.com>
 
 Git repository located at
